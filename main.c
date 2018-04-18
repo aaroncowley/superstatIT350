@@ -45,7 +45,9 @@ int main(void){
                 break;
             case 'b':
                 //change port number, IP, uname, and pword
-                system("mysqldump -P <your port> -h <yourip> -u <your user> -p<your pword> admin_db > /home/webadmin/backup.sql");
+                system("mysqldump -P 3306 -h 192.168.50.19 -u webadmin -p admin_db > /home/webadmin/backup.sql");
+                //redis backup
+                system("sudo cp /var/lib/redis/dump.rdb /home/webadmin/redis-backup-001");
                 break;
             case 'q':
                 //exits
