@@ -1,6 +1,8 @@
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <time.h>
 
 /*  This is the script created for checking status of wonky full stack web applcations
  *  
@@ -25,6 +27,8 @@ int main(void){
     int command;
     int run = 1;
 
+    char buf[1000];
+    time_t t = time(NULL);
     // options menu
     printf(RED"\n\n----------------pick an option----------------\n"RESET);
     printf(CYAN"option s: show status of websites\n"RESET);
@@ -45,9 +49,14 @@ int main(void){
                 break;
             case 'b':
                 //change port number, IP, uname, and pword
-                system("mysqldump -P 3306 -h 192.168.50.19 -u webadmin -p admin_db > /home/webadmin/backup.sql");
+                snprintf(buf, sizeof(buf), "mysqldump -P 3306 -h 192.168.50.19 -u webadmin -p admin_db > /home/webadmin/backup-%ld.sql", t/3600);
+                system(buf);
                 //redis backup
-                system("sudo cp /var/lib/redis/dump.rdb /home/webadmin/redis-backup-001");
+                snprintf(buf, sizeof(buf), "sudo cp /var/lib/redis/dump.rdb /home/webadmin/redis-backup-%ld", t/3600);
+                system(buf);
+                system("curl -XPUT 192.168.50.19:9200/_snapshot/my_backup -H \"Content-Type: application/json\" -d \'{\"type\": \"fs\",\"settings\": {\"location\": \"/home/webadmin/esearch\",\"compress\": true}}\'");
+                system("curl -XGET '192.168.50.19:9200/_snapshot/my_backup/_all?pretty'");
+                printf("TIME IS: %s", asctime(localtime(&t)));
                 break;
             case 'q':
                 //exits
